@@ -2,6 +2,8 @@ package games;
 
 import core.*;
 import core.rules.AbstractRuleBasedForwardModel;
+import games.arknova.*;
+import games.arknova.gui.ArkNovaGUIManager;
 import games.battlelore.*;
 import games.battlelore.gui.BattleloreGUI;
 import games.blackjack.*;
@@ -200,8 +202,12 @@ public enum GameType {
     ChineseCheckers(2, 6,
             Arrays.asList(Strategy, Abstract),
             Arrays.asList(GridMovement),
-            CCGameState.class, CCForwardModel.class, CCParameters.class, CCGUIManager.class);
+            CCGameState.class, CCForwardModel.class, CCParameters.class, CCGUIManager.class),
 
+    ArkNova(2, 4,
+            Arrays.asList(Animals, Economic, Environmental, Cards, Strategy),
+            Arrays.asList(Drafting, HandManagement, EndGameBonus, HexagonGrid, Income, SetCollection, TilePlacement, VariablePlayerPowers, EngineBuilding, TableauBuilding),
+    ArkNovaGameState.class, ArkNovaForwardModel.class, ArkNovaParameters.class, ArkNovaGUIManager.class);
 
     // Core classes where the game is defined
     final Class<? extends AbstractGameState> gameStateClass;
