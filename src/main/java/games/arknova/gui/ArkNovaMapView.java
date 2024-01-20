@@ -1,107 +1,163 @@
 package games.arknova.gui;
 
+import static games.terraformingmars.gui.Utils.drawImage;
+
 import games.arknova.ArkNovaGameState;
 import games.arknova.components.ArkNovaMap;
+import games.arknova.components.Building;
 import games.arknova.components.HexTile;
-import utilities.ImageIO;
-
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static games.terraformingmars.gui.Utils.drawImage;
+import java.awt.geom.AffineTransform;
+import javax.swing.*;
+import utilities.ImageIO;
 
 public class ArkNovaMapView extends JComponent {
 
-    final Point HEX_GRID_OFFSET = new Point(270, 130);
-    final Point MAP_SIZE = new Point(1500, 1500);
-    final int HEX_TILE_SIZE = 50;
-    Set<String> set = Stream.of("a", "b").collect(Collectors.toSet());
-    ArkNovaGameState gs;
-    Image mapImage;
+  final Point HEX_GRID_OFFSET = new Point(270, 130);
+  final Point MAP_SIZE = new Point(1500, 1500);
+  final int HEX_TILE_SIZE = 50;
+  ArkNovaGameState gs;
+  Image mapImage;
 
-    HexTile selectedHex;
+  HexTile selectedHex;
+  ArkNovaGUIManager gui;
 
-    public ArkNovaMapView(ArkNovaGUIManager gui, ArkNovaGameState gs) {
-        this.gs = gs;
+  public ArkNovaMapView(ArkNovaGUIManager gui, ArkNovaGameState gs) {
+    this.gs = gs;
+    this.gui = gui;
 
-        mapImage = ImageIO.GetInstance().getImage("data/arknova/Map5.png");
+    ArkNovaMap map = gs.getCurrentPlayerMap();
 
-        System.out.println("ArkNovaMap");
+    mapImage = ImageIO.GetInstance().getImage(map.getMapData().getMapImagePath());
 
-
-        int currPlayer = gs.getCurrentPlayer();
-        ArkNovaMap map = gs.getMaps()[currPlayer];
-
-        addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON1) {
-                    Point pixel = e.getPoint();
-                    pixel.translate(-HEX_GRID_OFFSET.x, -HEX_GRID_OFFSET.y);
-                    selectedHex = map.pixelToHex(pixel, HEX_TILE_SIZE);
-                }
+    addMouseListener(
+        new MouseAdapter() {
+          @Override
+          public void mouseClicked(MouseEvent e) {
+            if (e.getButton() == MouseEvent.BUTTON1) {
+              Point pixel = e.getPoint();
+              pixel.translate(-HEX_GRID_OFFSET.x, -HEX_GRID_OFFSET.y);
+              selectedHex = map.pixelToHex(pixel, HEX_TILE_SIZE);
             }
+          }
         });
+  }
 
-    }
+  public void drawBuilding(Graphics2D g, Building building) {
+    Image img = ImageIO.GetInstance().getImage(building.getImage());
+    HexTile hexTile = building.getOriginHex();
+    int x = (int) (HEX_GRID_OFFSET.x + (HEX_TILE_SIZE + 1) * (3. / 2 * hexTile.q));
+    int y =
+        (int)
+            (HEX_GRID_OFFSET.y
+                + (HEX_TILE_SIZE) * (Math.sqrt(3) / 2 * hexTile.q + Math.sqrt(3) * hexTile.r));
 
+    int size = HEX_TILE_SIZE;
+    int w = img.getWidth(null);
+    int h = img.getHeight(null);
+    double scale;
+    if (w > h) scale = size * 1.0 / w;
+    else scale = size * 1.0 / h;
 
-    public Dimension getPreferredSize() {
-        return new Dimension(MAP_SIZE.x, MAP_SIZE.y);
-    }
+    scale = 1.0;
 
-    @Override
-    protected void paintComponent(Graphics g_base) {
-        Graphics2D g = (Graphics2D) g_base.create();
-        drawImage(g, mapImage, 0, 0, MAP_SIZE.y);
-//        g2d.setColor(getBackground());
-//        g2d.fillRect(0, 0, getWidth(), getHeight());
-//        g2d.dispose();
+    AffineTransform tr = new AffineTransform();
+    y = y - h + (int) (Math.sqrt(3) * HEX_TILE_SIZE / 2);
+    x -= HEX_TILE_SIZE;
 
+    tr.translate(x - (int) gui.xModel.getValue(), y - (int) gui.yModel.getValue());
+    tr.scale(scale, scale);
 
-        ArkNovaMap map = gs.getMaps()[0];
+    tr.rotate(
+        //        Math.toRadians((int) gui.model.getValue()),
+        Math.toRadians(building.getRotation().getAngle()),
+        HEX_TILE_SIZE,
+        h - (Math.sqrt(3) * (HEX_TILE_SIZE + 1) / 2.0));
 
-        if (ArkNovaGUIManager.DEBUG) {
-            for (HexTile hexTile : map.getGrid().values()) {
-                double center_x = HEX_TILE_SIZE * (3. / 2 * hexTile.q);
-                double center_y = HEX_TILE_SIZE * (Math.sqrt(3) / 2 * hexTile.q + Math.sqrt(3) * hexTile.r);
+    g.drawImage(img, tr, null);
 
-                Polygon h = new Polygon();
-                for (int i = 0; i < 6; i++) {
-                    double angle = 2.0 * Math.PI * i / 6;
-                    double offset_x = HEX_TILE_SIZE * Math.cos(angle);
-                    double offset_y = HEX_TILE_SIZE * Math.sin(angle);
+    g.setColor(Color.RED);
+    g.drawLine(x, y, x + 2, y + 2);
+    new Rectangle(x, y, (int) (w * scale), (int) (h * scale));
+  }
 
-                    int hex_x = (int) (HEX_GRID_OFFSET.x + center_x + offset_x);
-                    int hex_y = (int) (HEX_GRID_OFFSET.y + center_y + offset_y);
+  public Dimension getPreferredSize() {
+    return new Dimension(MAP_SIZE.x, MAP_SIZE.y);
+  }
 
-                    h.addPoint(hex_x, hex_y);
+  @Override
+  protected void paintComponent(Graphics g_base) {
+    Graphics2D g = (Graphics2D) g_base.create();
+    drawImage(g, mapImage, 0, 0, MAP_SIZE.y);
 
-                }
+    ArkNovaMap map = gs.getMaps()[gui.getCurrentlyObservedPlayer()];
 
+    map.getBuildings().values().forEach((building) -> drawBuilding(g, building));
 
-                if (hexTile.equals(selectedHex)) {
-                    g.setColor(new Color(0, 255, 0, 50));
-                    g.fillPolygon(h);
-                }
+    if (ArkNovaGUIManager.DEBUG) {
+      for (HexTile hexTile : map.getGrid().values()) {
+        double center_x = (HEX_TILE_SIZE + 1) * (3. / 2 * hexTile.q);
+        double center_y = HEX_TILE_SIZE * (Math.sqrt(3) / 2 * hexTile.q + Math.sqrt(3) * hexTile.r);
 
-                g.setColor(Color.BLACK);
-                g.drawPolygon(h);
+        Polygon h = getPolygon(center_x, center_y);
 
+        if (map.getMapData().getTerrain().containsKey(hexTile)) {
+          ArkNovaMap.Terrain terrain = map.getMapData().getTerrain().get(hexTile);
 
-                g.setStroke(new BasicStroke(5));
-                g.setFont(new Font("Arial", Font.BOLD, 15));
-                g.drawString(Integer.toString(hexTile.q) + ", " + Integer.toString(hexTile.r),
-                        (int) center_x + HEX_GRID_OFFSET.x, (int) center_y + HEX_GRID_OFFSET.y);
-            }
+          switch (terrain) {
+            case ROCK:
+              g.setColor(new Color(114, 42, 5, 80));
+              g.fillPolygon(h);
+              break;
+            case WATER:
+              g.setColor(new Color(6, 63, 191, 90));
+              g.fillPolygon(h);
+              break;
+            case BUILD_2_REQUIRED:
+              g.setColor(new Color(247, 0, 235, 90));
+              g.fillPolygon(h);
+              break;
+            default:
+              g.setColor(new Color(221, 197, 42, 150));
+              g.fillPolygon(h);
+              break;
+          }
         }
 
+        if (hexTile.equals(selectedHex)) {
+          g.setColor(new Color(0, 255, 0, 50));
+          g.fillPolygon(h);
+        }
 
-        super.paintComponent(g);
+        g.setColor(Color.BLACK);
+        g.drawPolygon(h);
+
+        g.setStroke(new BasicStroke(5));
+        g.setFont(new Font("Arial", Font.BOLD, 15));
+        g.drawString(
+            Integer.toString(hexTile.q) + ", " + Integer.toString(hexTile.r),
+            (int) center_x + HEX_GRID_OFFSET.x,
+            (int) center_y + HEX_GRID_OFFSET.y);
+      }
     }
+
+    super.paintComponent(g);
+  }
+
+  private Polygon getPolygon(double center_x, double center_y) {
+    Polygon h = new Polygon();
+    for (int i = 0; i < 6; i++) {
+      double angle = 2.0 * Math.PI * i / 6;
+      double offset_x = HEX_TILE_SIZE * Math.cos(angle);
+      double offset_y = HEX_TILE_SIZE * Math.sin(angle);
+
+      int hex_x = (int) (HEX_GRID_OFFSET.x + center_x + offset_x);
+      int hex_y = (int) (HEX_GRID_OFFSET.y + center_y + offset_y);
+
+      h.addPoint(hex_x, hex_y);
+    }
+    return h;
+  }
 }

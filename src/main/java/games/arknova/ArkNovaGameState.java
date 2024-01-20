@@ -64,6 +64,12 @@ public class ArkNovaGameState extends AbstractGameState {
     @Override
     protected ArkNovaGameState _copy(int playerId) {
         ArkNovaGameState copy = new ArkNovaGameState(gameParameters, getNPlayers());
+        copy.maps = new ArkNovaMap[getNPlayers()];
+
+        for (int i = 0; i < getNPlayers(); i++) {
+            copy.maps[i] = this.maps[i].copy();
+
+        }
         // TODO: deep copy all variables to the new game state.
         return copy;
     }
@@ -96,6 +102,10 @@ public class ArkNovaGameState extends AbstractGameState {
 
     public ArkNovaMap[] getMaps() {
         return maps;
+    }
+
+    public ArkNovaMap getCurrentPlayerMap() {
+        return getMaps()[getCurrentPlayer()];
     }
 
     @Override
