@@ -3,6 +3,7 @@ package games.arknova.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Component;
+import games.arknova.ArkNovaGameState;
 
 /**
  * <p>Actions are unit things players can do in the game (e.g. play a card, move a pawn, roll dice, attack etc.).</p>
@@ -25,12 +26,25 @@ public class ArkNovaAction extends AbstractAction {
     /**
      * Executes this action, applying its effect to the given game state. Can access any component IDs stored
      * through the {@link AbstractGameState#getComponentById(int)} method.
+     *
      * @param gs - game state which should be modified by this action.
      * @return - true if successfully executed, false otherwise.
      */
     @Override
     public boolean execute(AbstractGameState gs) {
+        ArkNovaGameState state = (ArkNovaGameState) gs;
         // TODO: Some functionality applied which changes the given game state.
+//        try {
+//            Thread.sleep(100000);
+//        } catch (InterruptedException e) {
+//            throw new RuntimeException(e);
+//        }
+
+        this._execute(state);
+        return true;
+    }
+
+    public boolean _execute(ArkNovaGameState gameState) {
         return true;
     }
 
@@ -89,6 +103,6 @@ public class ArkNovaAction extends AbstractAction {
      * @param playerId - player to whom the action should be represented.
      * @return
      */
-   // @Override
-   // public String getString(AbstractGameState gameState, int playerId);
+    // @Override
+    // public String getString(AbstractGameState gameState, int playerId);
 }
