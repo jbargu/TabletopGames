@@ -2,6 +2,7 @@ package games.arknova.components;
 
 import core.CoreConstants;
 import core.components.Component;
+import games.arknova.ArkNovaConstants;
 import games.arknova.actions.Bonus;
 import java.awt.*;
 import java.util.*;
@@ -157,7 +158,6 @@ public class ArkNovaMap extends Component {
     HashSet<HexTile> possibleStartingHexes =
         getPossibleStartingBuildingHexes(isBuildUpgraded, hasDiversityResearcher, coveredHexes);
 
-    // Define which buildings can be built -> special enclosures can only be built once
     Set<BuildingType> existingSpecialBuildings =
         buildings.values().stream()
             .map(Building::getType)
@@ -166,6 +166,7 @@ public class ArkNovaMap extends Component {
                     buildingType.subType == BuildingType.BuildingSubType.ENCLOSURE_SPECIAL)
             .collect(Collectors.toSet());
 
+    // Define which buildings can be built -> special enclosures can only be built once
     HashSet<BuildingType> buildingTypes =
         Arrays.stream(BuildingType.values())
             .filter(
@@ -174,6 +175,12 @@ public class ArkNovaMap extends Component {
                         && !(buildingType.subType == BuildingType.BuildingSubType.ENCLOSURE_SPECIAL
                             && existingSpecialBuildings.contains(buildingType)))
             .collect(Collectors.toCollection(HashSet::new));
+
+    // Find existing kiosk for distance calculation
+    Set<Building> existingKiosks =
+        buildings.values().stream()
+            .filter(building -> building.getType() == BuildingType.KIOSK)
+            .collect(Collectors.toSet());
 
     // We cannot build aviary and reptile house if build is not upgraded
     if (!isBuildUpgraded) {
@@ -184,15 +191,26 @@ public class ArkNovaMap extends Component {
     // For every hex try to place the building on the hex with all possible rotations
     for (HexTile startingHex : possibleStartingHexes) {
       for (BuildingType buildingType : buildingTypes) {
+        if (buildingType == BuildingType.KIOSK) {
+          long numOfTooCloseKiosks =
+              existingKiosks.stream()
+                  .map(kiosk -> kiosk.getOriginHex().distance(startingHex))
+                  .filter(distance -> distance < ArkNovaConstants.MINIMUM_KIOSK_DISTANCE)
+                  .count();
+
+          if (numOfTooCloseKiosks > 0) {
+            continue;
+          }
+        }
 
         // TODO: optimize
         for (Building.Rotation rotation : Building.Rotation.values()) {
           Building building = new Building(buildingType, startingHex, rotation);
 
           boolean legalPlacement = true;
-          for (HexTile resultingTile : building.getLayout()) {
+          for (HexTile buildingTile : building.getLayout()) {
             legalPlacement &=
-                canBuildOnHex(resultingTile, coveredHexes, isBuildUpgraded, hasDiversityResearcher);
+                canBuildOnHex(buildingTile, coveredHexes, isBuildUpgraded, hasDiversityResearcher);
           }
 
           if (legalPlacement) {

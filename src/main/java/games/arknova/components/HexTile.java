@@ -41,6 +41,19 @@ public class HexTile {
     return new HexTile(this.q - other.q, this.r - other.r);
   }
 
+  /**
+   * Calculates distance (how many hops is needed to reach other hex tile).
+   *
+   * @param other Hex tile to calculate distance for.
+   * @return integer distance between the hex tiles.
+   */
+  public int distance(HexTile other) {
+    return (Math.abs(this.q - other.q)
+            + Math.abs(this.q + this.r - other.q - other.r)
+            + Math.abs(this.r - other.r))
+        / 2;
+  }
+
   public HexTile rotateLeft() {
     return new HexTile(-getS(), -q);
   }

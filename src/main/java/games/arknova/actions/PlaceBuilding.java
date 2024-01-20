@@ -15,7 +15,8 @@ public class PlaceBuilding extends ArkNovaAction {
   public boolean _execute(ArkNovaGameState gs) {
     gs.getCurrentPlayerMap().addBuilding(building);
 
-    System.out.println("Add building:" + building);
+    //    System.out.println(String.format("Add building: " + building));
+    System.out.format("[%s] Add Building: %s\n", gs.getCurrentPlayer(), building);
 
     return super._execute(gs);
   }

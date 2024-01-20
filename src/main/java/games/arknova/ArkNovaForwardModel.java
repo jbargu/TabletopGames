@@ -70,7 +70,9 @@ public class ArkNovaForwardModel extends StandardForwardModel {
             .getCurrentPlayerMap()
             .getLegalBuildingsPlacements(isBuildUpgraded, hasDiversityResearcher);
 
-    System.out.println("Legal buildings placements: " + legalBuildingsPlacements.size());
+    System.out.format(
+        "[%s] Legal buildings placements: %s \n",
+        state.getCurrentPlayer(), legalBuildingsPlacements.size());
     for (Building building : legalBuildingsPlacements) {
       actions.add(new PlaceBuilding(building));
     }

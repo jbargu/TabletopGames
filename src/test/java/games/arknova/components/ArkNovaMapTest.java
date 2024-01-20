@@ -3,7 +3,9 @@ package games.arknova.components;
 import static org.testng.Assert.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.stream.Collectors;
 import org.testng.annotations.Test;
 
@@ -118,6 +120,55 @@ public class ArkNovaMapTest {
   }
 
   @Test
+  public void testGetLegalBuildingsPlacementKioskTooClose() {
+    ArkNovaMap map = new ArkNovaMap(ArkNovaMap.MapData.Map7);
+    map.addBuilding(new Building(BuildingType.KIOSK, new HexTile(7, 2), Building.Rotation.ROT_0));
+
+    // We can't add a kiosk to a single kiosk on board
+    assert (map.getLegalBuildingsPlacements(true, true).stream()
+        .filter(building -> building.getType() == BuildingType.KIOSK)
+        .collect(Collectors.toSet())
+        .isEmpty());
+
+    // We add another pavilion to the kiosk -> but we are still too close for kiosk
+    map.addBuilding(
+        new Building(BuildingType.PAVILION, new HexTile(6, 2), Building.Rotation.ROT_0));
+    assert (map.getLegalBuildingsPlacements(true, true).stream()
+        .filter(building -> building.getType() == BuildingType.KIOSK)
+        .collect(Collectors.toSet())
+        .isEmpty());
+
+    // After we add another kiosk, we can add a single kiosk on (4, 3)
+    map.addBuilding(
+        new Building(BuildingType.PAVILION, new HexTile(5, 2), Building.Rotation.ROT_0));
+
+    List<HexTile> kioskLocations =
+        map.getLegalBuildingsPlacements(true, false).stream()
+            .filter(building -> building.getType() == BuildingType.KIOSK)
+            .map(Building::getOriginHex)
+            .collect(Collectors.toList());
+
+    assertEquals(kioskLocations.size(), 1);
+    assert (kioskLocations.contains(new HexTile(4, 3)));
+
+    // If we have a Diversity researcher, we have 3 possible choices
+    kioskLocations =
+        map.getLegalBuildingsPlacements(true, true).stream()
+            .filter(building -> building.getType() == BuildingType.KIOSK)
+            .map(Building::getOriginHex)
+            .collect(Collectors.toList());
+
+    assertEquals(kioskLocations.size(), 3);
+    assert (kioskLocations.containsAll(
+        Arrays.asList(new HexTile(4, 3), new HexTile(4, 2), new HexTile(5, 1))));
+  }
+
+  @Test
+  public void testGetLegalBuildingsPlacements() {
+    // TODO: check whether everything is correctly generated
+  }
+
+  @Test
   public void testCanBuildOnHex() {
     ArkNovaMap map = new ArkNovaMap(ArkNovaMap.MapData.Map7);
 
@@ -152,10 +203,5 @@ public class ArkNovaMapTest {
 
     // It should return only border tiles
     assert (possibleStartingBuildingHexes.containsAll(map.getBorderTiles(false)));
-  }
-
-  @Test
-  public void testGetLegalBuildingsPlacements() {
-    // TODO: check whether everything is correctly generated
   }
 }
