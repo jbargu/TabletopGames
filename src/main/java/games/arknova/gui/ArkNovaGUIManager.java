@@ -6,11 +6,10 @@ import core.Game;
 import games.arknova.ArkNovaGameState;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
-import players.human.ActionController;
-
-import javax.swing.*;
 import java.awt.*;
 import java.util.Set;
+import javax.swing.*;
+import players.human.ActionController;
 
 /**
  * This class allows the visualisation of the game. The game components (accessible through {@link
@@ -37,6 +36,7 @@ public class ArkNovaGUIManager extends AbstractGUIManager {
   Image mapImage;
 
   ArkNovaMapView mapView;
+  SidebarPanel sidebar;
 
   SpinnerModel model;
   SpinnerModel xModel;
@@ -48,18 +48,34 @@ public class ArkNovaGUIManager extends AbstractGUIManager {
     super(parent, game, ac, human);
     if (game == null) return;
 
-    currentlyObservedPlayer = game.getGameState().getCurrentPlayer();
+    ArkNovaGameState gs = (ArkNovaGameState) game.getGameState();
 
-    JPanel mainPane = new JPanel();
-    mainPane.setOpaque(false);
-    mainPane.setLayout(new FlowLayout());
-
-    // TODO: set up GUI components and add to `parent`
-    mapView = new ArkNovaMapView(this, (ArkNovaGameState) game.getGameState());
-    mainPane.add(mapView);
-
+    currentlyObservedPlayer = gs.getCurrentPlayer();
     parent.setLayout(new BorderLayout());
-    parent.add(mainPane);
+
+    // Top notification bar
+    JButton notifications = new JButton("notifications");
+    parent.add(notifications, BorderLayout.PAGE_START);
+
+    // left map view
+    parent.add(getMapPane(), BorderLayout.LINE_START);
+
+    // right sidebar for player overview
+    sidebar = new SidebarPanel(this, gs);
+    parent.add(sidebar, BorderLayout.LINE_END);
+
+    parent.revalidate();
+    parent.setVisible(true);
+    parent.repaint();
+  }
+
+  private JPanel getMapPane() {
+    JPanel mapPane = new JPanel();
+    mapPane.setOpaque(false);
+    mapPane.setLayout(new FlowLayout());
+
+    mapView = new ArkNovaMapView(this, (ArkNovaGameState) game.getGameState());
+    mapPane.add(mapView);
 
     model =
         new SpinnerNumberModel(
@@ -85,12 +101,12 @@ public class ArkNovaGUIManager extends AbstractGUIManager {
     panel.setSize(200, 300);
     JSpinner spinner = new JSpinner(model);
 
-    mainPane.add(spinner);
-    mainPane.add(new JSpinner(xModel));
-    mainPane.add(new JSpinner(yModel));
+    mapPane.add(spinner);
+    mapPane.add(new JSpinner(xModel));
+    mapPane.add(new JSpinner(yModel));
 
     playerNumber = new JLabel();
-    mainPane.add(playerNumber);
+    mapPane.add(playerNumber);
 
     JButton nextPlayer = new JButton("Observe next player");
     nextPlayer.addActionListener(
@@ -98,11 +114,9 @@ public class ArkNovaGUIManager extends AbstractGUIManager {
             currentlyObservedPlayer =
                 (currentlyObservedPlayer + 1) % game.getGameState().getNPlayers());
 
-    mainPane.add(nextPlayer);
+    mapPane.add(nextPlayer);
 
-    parent.revalidate();
-    parent.setVisible(true);
-    parent.repaint();
+    return mapPane;
   }
 
   /**
@@ -132,6 +146,8 @@ public class ArkNovaGUIManager extends AbstractGUIManager {
   @Override
   protected void _update(AbstractPlayer player, AbstractGameState gameState) {
     playerNumber.setText("Player  " + currentlyObservedPlayer);
+
+    sidebar.update();
 
     parent.repaint();
   }

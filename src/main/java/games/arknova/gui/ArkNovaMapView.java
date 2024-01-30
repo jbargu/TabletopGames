@@ -88,8 +88,8 @@ public class ArkNovaMapView extends JComponent {
   }
 
   @Override
-  protected void paintComponent(Graphics g_base) {
-    Graphics2D g = (Graphics2D) g_base.create();
+  protected void paintComponent(Graphics gBase) {
+    Graphics2D g = (Graphics2D) gBase.create();
     drawImage(g, mapImage, 0, 0, MAP_SIZE.y);
 
     ArkNovaMap map = gs.getMaps()[gui.getCurrentlyObservedPlayer()];
