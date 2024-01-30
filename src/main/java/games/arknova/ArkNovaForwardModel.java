@@ -3,10 +3,12 @@ package games.arknova;
 import core.AbstractGameState;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
+import core.components.Counter;
 import games.arknova.actions.PlaceBuilding;
 import games.arknova.components.ArkNovaMap;
 import games.arknova.components.Building;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -44,9 +46,43 @@ public class ArkNovaForwardModel extends StandardForwardModel {
     int nPlayers = gs.getNPlayers();
 
     gs.maps = new ArkNovaMap[nPlayers];
+    gs.playerIcons = new HashMap[nPlayers];
+    gs.playerResources = new HashMap[nPlayers];
     for (int i = 0; i < nPlayers; i++) {
       gs.maps[i] = new ArkNovaMap(ArkNovaMap.MapData.Map7);
+      gs.playerIcons[i] = new HashMap<>();
+      gs.playerResources[i] = new HashMap<>();
+
+      // Set all resource to the initial value
+      gs.playerResources[i].put(
+          ArkNovaConstants.Resource.MONEY,
+          new Counter(ArkNovaConstants.STARTING_MONEY, 0, Integer.MAX_VALUE, "MoneyCounter"));
+      gs.playerResources[i].put(
+          ArkNovaConstants.Resource.APPEAL,
+          new Counter(i, 0, ArkNovaConstants.MAXIMUM_APPEAL, "AppealCounter"));
+
+      gs.playerResources[i].put(
+          ArkNovaConstants.Resource.CONSERVATION_POINTS,
+          new Counter(
+              0, 0, ArkNovaConstants.MAXIMUM_CONSERVATION_POINTS, "ConservationPointsCounter"));
+
+      gs.playerResources[i].put(
+          ArkNovaConstants.Resource.REPUTATION,
+          new Counter(0, 1, ArkNovaConstants.MAXIMUM_REPUTATION, "ReputationCounter"));
+      gs.playerResources[i].put(
+          ArkNovaConstants.Resource.X_TOKEN,
+          new Counter(0, 0, ArkNovaConstants.MAXIMUM_X_TOKEN, "XTokenCounter"));
+      gs.playerResources[i].put(
+          ArkNovaConstants.Resource.WORKER,
+          new Counter(1, 1, ArkNovaConstants.MAXIMUM_WORKERS, "WorkerCounter"));
+
+      // Set all icons to 0
+      for (ArkNovaConstants.Icon icon : ArkNovaConstants.Icon.values()) {
+        gs.playerIcons[i].put(icon, new Counter(icon.name() + "IconCounter"));
+      }
     }
+    gs.breakCounter =
+        new Counter(0, 0, ArkNovaConstants.MAXIMUM_BREAK[nPlayers - 1], "BreakCounter");
   }
 
   /**
@@ -64,7 +100,7 @@ public class ArkNovaForwardModel extends StandardForwardModel {
     int i = state.getCurrentPlayer();
 
     boolean hasDiversityResearcher = false;
-    boolean isBuildUpgraded = false;
+    boolean isBuildUpgraded = true;
     ArrayList<Building> legalBuildingsPlacements =
         state
             .getCurrentPlayerMap()
