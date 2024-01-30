@@ -3,9 +3,13 @@ package games.arknova.gui;
 import games.arknova.ArkNovaConstants;
 import games.arknova.ArkNovaGameState;
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.EtchedBorder;
 import utilities.ImageIO;
 
 /** A panel with player's resources and icons. */
@@ -25,8 +29,6 @@ public class PlayerOverviewPanel extends JPanel {
     this.gui = gui;
     this.playerId = playerId;
 
-    this.setBorder(BorderFactory.createTitledBorder(String.format("Player %d", playerId)));
-
     scoreLabel = new JLabel();
 
     JPanel resourcesPanel = createResourcesPanel();
@@ -37,6 +39,8 @@ public class PlayerOverviewPanel extends JPanel {
     add(scoreLabel);
     add(resourcesPanel);
     add(iconsPanel);
+
+    addMouseListener();
 
     // Set to initial values
     update();
@@ -103,5 +107,37 @@ public class PlayerOverviewPanel extends JPanel {
       int value = gs.getPlayerIcons()[playerId].get(icon).getValue();
       SwingUtilities.invokeLater(() -> label.setText(String.valueOf(value)));
     }
+
+    if (gui.getCurrentlyObservedPlayer() == playerId) {
+      Border loweredetched = BorderFactory.createEtchedBorder(EtchedBorder.RAISED);
+      loweredetched = BorderFactory.createLoweredBevelBorder();
+      this.setBorder(
+          BorderFactory.createTitledBorder(loweredetched, String.format("Player %d", playerId)));
+    } else {
+      this.setBorder(BorderFactory.createTitledBorder(String.format("Player %d", playerId)));
+    }
+  }
+
+  /** Change currently observed player. */
+  private void addMouseListener() {
+    addMouseListener(
+        new MouseListener() {
+          @Override
+          public void mouseClicked(MouseEvent e) {
+            gui.setCurrentlyObservedPlayer(playerId);
+          }
+
+          @Override
+          public void mousePressed(MouseEvent e) {}
+
+          @Override
+          public void mouseReleased(MouseEvent e) {}
+
+          @Override
+          public void mouseEntered(MouseEvent e) {}
+
+          @Override
+          public void mouseExited(MouseEvent e) {}
+        });
   }
 }

@@ -67,7 +67,8 @@ public class ArkNovaMapView extends JComponent {
     y = y - h + (int) (Math.sqrt(3) * HEX_TILE_SIZE / 2);
     x -= HEX_TILE_SIZE;
 
-    tr.translate(x - (int) gui.xModel.getValue(), y - (int) gui.yModel.getValue());
+    //    tr.translate(x - (int) gui.xModel.getValue(), y - (int) gui.yModel.getValue());
+    tr.translate(x, y);
     tr.scale(scale, scale);
 
     tr.rotate(

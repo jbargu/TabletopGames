@@ -31,16 +31,12 @@ public class ArkNovaGUIManager extends AbstractGUIManager {
 
   public static boolean DEBUG = true;
 
-  int currentlyObservedPlayer;
+  protected int currentlyObservedPlayer;
 
   Image mapImage;
 
   ArkNovaMapView mapView;
   SidebarPanel sidebar;
-
-  SpinnerModel model;
-  SpinnerModel xModel;
-  SpinnerModel yModel;
 
   JLabel playerNumber;
 
@@ -54,8 +50,8 @@ public class ArkNovaGUIManager extends AbstractGUIManager {
     parent.setLayout(new BorderLayout());
 
     // Top notification bar
-    JButton notifications = new JButton("notifications");
-    parent.add(notifications, BorderLayout.PAGE_START);
+    playerNumber = new JLabel();
+    parent.add(playerNumber, BorderLayout.PAGE_START);
 
     // left map view
     parent.add(getMapPane(), BorderLayout.LINE_START);
@@ -77,45 +73,6 @@ public class ArkNovaGUIManager extends AbstractGUIManager {
     mapView = new ArkNovaMapView(this, (ArkNovaGameState) game.getGameState());
     mapPane.add(mapView);
 
-    model =
-        new SpinnerNumberModel(
-            0, // initial value
-            -360, // min
-            360, // max
-            60);
-
-    xModel =
-        new SpinnerNumberModel(
-            0, // initial value
-            -360, // min
-            360, // max
-            5);
-
-    yModel =
-        new SpinnerNumberModel(
-            0, // initial value
-            -360, // min
-            360, // max
-            5);
-    JPanel panel = new JPanel();
-    panel.setSize(200, 300);
-    JSpinner spinner = new JSpinner(model);
-
-    mapPane.add(spinner);
-    mapPane.add(new JSpinner(xModel));
-    mapPane.add(new JSpinner(yModel));
-
-    playerNumber = new JLabel();
-    mapPane.add(playerNumber);
-
-    JButton nextPlayer = new JButton("Observe next player");
-    nextPlayer.addActionListener(
-        e ->
-            currentlyObservedPlayer =
-                (currentlyObservedPlayer + 1) % game.getGameState().getNPlayers());
-
-    mapPane.add(nextPlayer);
-
     return mapPane;
   }
 
@@ -135,6 +92,10 @@ public class ArkNovaGUIManager extends AbstractGUIManager {
 
   public int getCurrentlyObservedPlayer() {
     return currentlyObservedPlayer;
+  }
+
+  public void setCurrentlyObservedPlayer(int currentlyObservedPlayer) {
+    this.currentlyObservedPlayer = currentlyObservedPlayer;
   }
 
   /**
