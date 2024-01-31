@@ -15,9 +15,10 @@ import utilities.ImageIO;
 
 public class ArkNovaMapView extends JComponent {
 
-  final Point HEX_GRID_OFFSET = new Point(270, 130);
-  final Point MAP_SIZE = new Point(1500, 1500);
-  final int HEX_TILE_SIZE = 50;
+  final double SCALE = 1.0;
+  Point HEX_GRID_OFFSET = new Point(270, 130);
+  Point MAP_SIZE = new Point(1500, 1500);
+  int HEX_TILE_SIZE = 50;
   ArkNovaGameState gs;
   Image mapImage;
 
@@ -29,6 +30,13 @@ public class ArkNovaMapView extends JComponent {
     this.gui = gui;
 
     ArkNovaMap map = gs.getCurrentPlayerMap();
+
+    // Dynamic variables based on the scale of the GUI
+    // TODO: check if even needed
+    HEX_TILE_SIZE = (int) (SCALE * HEX_TILE_SIZE);
+    HEX_GRID_OFFSET =
+        new Point((int) (HEX_GRID_OFFSET.x * SCALE), (int) (HEX_GRID_OFFSET.y * SCALE));
+    MAP_SIZE = new Point((int) (MAP_SIZE.x * SCALE), (int) (MAP_SIZE.y * SCALE));
 
     mapImage = ImageIO.GetInstance().getImage(map.getMapData().getMapImagePath());
 
@@ -61,7 +69,7 @@ public class ArkNovaMapView extends JComponent {
     if (w > h) scale = size * 1.0 / w;
     else scale = size * 1.0 / h;
 
-    scale = 1.0;
+    scale = SCALE;
 
     AffineTransform tr = new AffineTransform();
     y = y - h + (int) (Math.sqrt(3) * HEX_TILE_SIZE / 2);
@@ -69,6 +77,7 @@ public class ArkNovaMapView extends JComponent {
 
     //    tr.translate(x - (int) gui.xModel.getValue(), y - (int) gui.yModel.getValue());
     tr.translate(x, y);
+
     tr.scale(scale, scale);
 
     tr.rotate(
@@ -81,11 +90,10 @@ public class ArkNovaMapView extends JComponent {
 
     g.setColor(Color.RED);
     g.drawLine(x, y, x + 2, y + 2);
-    new Rectangle(x, y, (int) (w * scale), (int) (h * scale));
   }
 
   public Dimension getPreferredSize() {
-    return new Dimension(MAP_SIZE.x, MAP_SIZE.y);
+    return new Dimension(MAP_SIZE.x, MAP_SIZE.y / 2);
   }
 
   @Override
@@ -138,7 +146,7 @@ public class ArkNovaMapView extends JComponent {
         g.setStroke(new BasicStroke(5));
         g.setFont(new Font("Arial", Font.BOLD, 15));
         g.drawString(
-            Integer.toString(hexTile.q) + ", " + Integer.toString(hexTile.r),
+            hexTile.q + ", " + hexTile.r,
             (int) center_x + HEX_GRID_OFFSET.x,
             (int) center_y + HEX_GRID_OFFSET.y);
       }

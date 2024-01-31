@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.swing.*;
 import players.human.ActionController;
+import utilities.ImageIO;
 
 /**
  * This class allows the visualisation of the game. The game components (accessible through {@link
@@ -56,6 +57,9 @@ public class ArkNovaGUIManager extends AbstractGUIManager {
     // left map view
     parent.add(getMapPane(), BorderLayout.LINE_START);
 
+    // center map
+    parent.add(getCenterPane(), BorderLayout.CENTER);
+
     // right sidebar for player overview
     createActionHistoryPanel(defaultDisplayWidth, defaultInfoPanelHeight * 4, new HashSet<>());
     sidebar = new SidebarPanel(this, gs, historyContainer);
@@ -66,13 +70,76 @@ public class ArkNovaGUIManager extends AbstractGUIManager {
     parent.repaint();
   }
 
+  // TODO: temporary placeholders
+  private JPanel getCenterPane() {
+    JPanel centerPane = new JPanel();
+    centerPane.setLayout(new BoxLayout(centerPane, BoxLayout.Y_AXIS));
+
+    centerPane.add(new JLabel("Conservation points bonuses"));
+    Image cpTrackBonuses =
+        ImageIO.GetInstance()
+            .getImage("data/arknova/association/conservation_track_bonuses.png")
+            .getScaledInstance(1000, 120, Image.SCALE_SMOOTH);
+    JLabel cpTrackBonusesImage = new JLabel(new ImageIcon(cpTrackBonuses));
+    centerPane.add(cpTrackBonusesImage);
+
+    centerPane.add(new JLabel("Association board"));
+
+    Image assocBoard =
+        ImageIO.GetInstance()
+            .getImage("data/arknova/association/assoc_board.png")
+            .getScaledInstance(1000, 500, Image.SCALE_SMOOTH);
+    JLabel assocImage = new JLabel(new ImageIcon(assocBoard));
+    centerPane.add(assocImage);
+
+    centerPane.add(
+        new JPanel() {
+          @Override
+          protected void paintComponent(Graphics g) {
+            //            super.paintComponent(g);
+
+            g.setColor(new Color(0x4DFA7502, true));
+            g.fillRect(20, 50, 1000, 400);
+
+            g.setFont(defaultFont);
+            g.setColor(Color.BLACK);
+            g.drawString("Player tableau placeholder", 20, 80);
+          }
+        });
+
+    return centerPane;
+  }
+
   private JPanel getMapPane() {
     JPanel mapPane = new JPanel();
-    mapPane.setOpaque(false);
-    mapPane.setLayout(new FlowLayout());
+    mapPane.setLayout(new BoxLayout(mapPane, BoxLayout.Y_AXIS));
 
+    mapPane.add(new JLabel("Display cards"));
+    Image displayCardsImage =
+        ImageIO.GetInstance()
+            .getImage("data/arknova/display_cards.png")
+            .getScaledInstance(1500, 300, Image.SCALE_SMOOTH);
+    mapPane.add(new JLabel(new ImageIcon(displayCardsImage)));
+
+    mapPane.add(new JLabel("Map"));
     mapView = new ArkNovaMapView(this, (ArkNovaGameState) game.getGameState());
     mapPane.add(mapView);
+
+    mapPane.add(
+        new JPanel() {
+          @Override
+          protected void paintComponent(Graphics g) {
+            //            super.paintComponent(g);
+
+            g.setColor(new Color(0x4D771313, true));
+            g.fillRect(20, 50, 1500, 400);
+
+            g.setFont(defaultFont);
+            g.setColor(Color.BLACK);
+            g.drawString("Player hand", 20, 80);
+          }
+        },
+        BorderLayout.PAGE_END);
 
     return mapPane;
   }
@@ -110,7 +177,6 @@ public class ArkNovaGUIManager extends AbstractGUIManager {
     playerNumber.setText("Player  " + currentlyObservedPlayer);
 
     sidebar.update();
-
     parent.repaint();
   }
 }
