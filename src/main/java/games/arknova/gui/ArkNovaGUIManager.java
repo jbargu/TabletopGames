@@ -7,6 +7,7 @@ import games.arknova.ArkNovaGameState;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import java.awt.*;
+import java.util.HashSet;
 import java.util.Set;
 import javax.swing.*;
 import players.human.ActionController;
@@ -57,7 +58,8 @@ public class ArkNovaGUIManager extends AbstractGUIManager {
     parent.add(getMapPane(), BorderLayout.LINE_START);
 
     // right sidebar for player overview
-    sidebar = new SidebarPanel(this, gs);
+    createActionHistoryPanel(defaultDisplayWidth, defaultInfoPanelHeight * 4, new HashSet<>());
+    sidebar = new SidebarPanel(this, gs, historyContainer);
     parent.add(sidebar, BorderLayout.LINE_END);
 
     parent.revalidate();

@@ -11,7 +11,7 @@ public class SidebarPanel extends JPanel {
 
   PlayerOverviewPanel[] playerPanels;
 
-  public SidebarPanel(ArkNovaGUIManager gui, ArkNovaGameState gs) {
+  public SidebarPanel(ArkNovaGUIManager gui, ArkNovaGameState gs, JScrollPane historyContainer) {
     this.gs = gs;
     this.gui = gui;
 
@@ -27,8 +27,9 @@ public class SidebarPanel extends JPanel {
       this.add(playerPanels[i]);
     }
 
-    this.update();
-    revalidate();
+    add(historyContainer);
+
+    update();
   }
 
   public void update() {
