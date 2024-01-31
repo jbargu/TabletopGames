@@ -31,11 +31,9 @@ import players.human.ActionController;
 public class ArkNovaGUIManager extends AbstractGUIManager {
 
   public static boolean DEBUG = true;
-
+  static int fontSize = 16;
+  static Font defaultFont = new Font("Dialog", Font.BOLD, fontSize);
   protected int currentlyObservedPlayer;
-
-  Image mapImage;
-
   ArkNovaMapView mapView;
   SidebarPanel sidebar;
 
@@ -52,6 +50,7 @@ public class ArkNovaGUIManager extends AbstractGUIManager {
 
     // Top notification bar
     playerNumber = new JLabel();
+    playerNumber.setFont(defaultFont);
     parent.add(playerNumber, BorderLayout.PAGE_START);
 
     // left map view

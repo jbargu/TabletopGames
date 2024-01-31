@@ -19,6 +19,7 @@ public class SidebarPanel extends JPanel {
 
     this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
     breakCounterLabel = new JLabel("Break counter");
+    breakCounterLabel.setFont(ArkNovaGUIManager.defaultFont);
 
     add(breakCounterLabel);
 

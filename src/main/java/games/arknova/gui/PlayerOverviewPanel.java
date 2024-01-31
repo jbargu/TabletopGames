@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.swing.border.EtchedBorder;
 import utilities.ImageIO;
 
 /** A panel with player's resources and icons. */
@@ -30,6 +29,7 @@ public class PlayerOverviewPanel extends JPanel {
     this.playerId = playerId;
 
     scoreLabel = new JLabel();
+    scoreLabel.setFont(ArkNovaGUIManager.defaultFont);
 
     JPanel resourcesPanel = createResourcesPanel();
     JPanel iconsPanel = createIconsPanel();
@@ -57,6 +57,7 @@ public class PlayerOverviewPanel extends JPanel {
               String.format(
                   "%s: %d",
                   resource.name(), gs.getPlayerResources()[playerId].get(resource).getValue()));
+      resourceLabel.setFont(ArkNovaGUIManager.defaultFont);
       resourceLabels.put(resource, resourceLabel);
       resourcesPanel.add(resourceLabel);
     }
@@ -75,8 +76,11 @@ public class PlayerOverviewPanel extends JPanel {
           ImageIO.GetInstance()
               .getImage(icon.getImagePath())
               .getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+
       JLabel iconLabel = new JLabel(new ImageIcon(iconImage));
       iconLabel.setText(String.valueOf(gs.getPlayerIcons()[playerId].get(icon).getValue()));
+      iconLabel.setFont(ArkNovaGUIManager.defaultFont);
+
       iconLabels.put(icon, iconLabel);
       iconsPanel.add(iconLabel);
     }
@@ -92,12 +96,7 @@ public class PlayerOverviewPanel extends JPanel {
 
       int value = gs.getPlayerResources()[playerId].get(resource).getValue();
       SwingUtilities.invokeLater(
-          () ->
-              label.setText(
-                  String.format(
-                      "%s: %d",
-                      resource.name(),
-                      gs.getPlayerResources()[playerId].get(resource).getValue())));
+          () -> label.setText(String.format("%s: %d", resource.name(), value)));
     }
 
     for (Map.Entry<ArkNovaConstants.Icon, JLabel> entry : iconLabels.entrySet()) {
@@ -109,10 +108,12 @@ public class PlayerOverviewPanel extends JPanel {
     }
 
     if (gui.getCurrentlyObservedPlayer() == playerId) {
-      Border loweredetched = BorderFactory.createEtchedBorder(EtchedBorder.RAISED);
-      loweredetched = BorderFactory.createLoweredBevelBorder();
-      this.setBorder(
-          BorderFactory.createTitledBorder(loweredetched, String.format("Player %d", playerId)));
+      Border loweredBevelBorder = BorderFactory.createLoweredBevelBorder();
+      Border border =
+          BorderFactory.createTitledBorder(
+              loweredBevelBorder, String.format("Player %d", playerId));
+
+      this.setBorder(border);
     } else {
       this.setBorder(BorderFactory.createTitledBorder(String.format("Player %d", playerId)));
     }
