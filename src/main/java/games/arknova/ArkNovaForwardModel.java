@@ -68,7 +68,7 @@ public class ArkNovaForwardModel extends StandardForwardModel {
 
       gs.playerResources[i].put(
           ArkNovaConstants.Resource.REPUTATION,
-          new Counter(0, 1, ArkNovaConstants.MAXIMUM_REPUTATION, "ReputationCounter"));
+          new Counter(1, 1, ArkNovaConstants.MAXIMUM_REPUTATION, "ReputationCounter"));
       gs.playerResources[i].put(
           ArkNovaConstants.Resource.X_TOKEN,
           new Counter(0, 0, ArkNovaConstants.MAXIMUM_X_TOKEN, "XTokenCounter"));
@@ -82,7 +82,7 @@ public class ArkNovaForwardModel extends StandardForwardModel {
       }
     }
     gs.breakCounter =
-        new Counter(0, 0, ArkNovaConstants.MAXIMUM_BREAK[nPlayers - 1], "BreakCounter");
+        new Counter(0, 0, ArkNovaConstants.MAXIMUM_BREAK[nPlayers - 2], "BreakCounter");
   }
 
   /**

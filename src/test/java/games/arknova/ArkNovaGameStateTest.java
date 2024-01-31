@@ -24,23 +24,43 @@ public class ArkNovaGameStateTest {
   ArkNovaForwardModel fm = new ArkNovaForwardModel();
 
   @Test
-  public void testGetGameScore() {
-    ArkNovaGameState gameState = (ArkNovaGameState) game.getGameState();
+  public void testSetup() {
+    // TODO: add other checks
+    ArkNovaGameState gs = (ArkNovaGameState) game.getGameState();
 
-    assertEquals(gameState.getGameScore(0), -14);
-    assertEquals(gameState.getGameScore(1), -13);
-    assertEquals(gameState.getGameScore(2), -12);
+    assertEquals(gs.getBreakCounter().getMaximum(), 12);
+
+    for (AbstractPlayer player : players) {
+      assertEquals(gs.getMoney(player.getPlayerID()).getValue(), 25);
+      assertEquals(gs.getConservationPoints(player.getPlayerID()).getValue(), 0);
+      assertEquals(gs.getReputation(player.getPlayerID()).getValue(), 1);
+      assertEquals(gs.getXTokens(player.getPlayerID()).getValue(), 0);
+      assertEquals(gs.getWorkers(player.getPlayerID()).getValue(), 1);
+    }
+
+    assertEquals(gs.getAppeal(0).getValue(), 0);
+    assertEquals(gs.getAppeal(1).getValue(), 1);
+    assertEquals(gs.getAppeal(2).getValue(), 2);
+  }
+
+  @Test
+  public void testGetGameScore() {
+    ArkNovaGameState gs = (ArkNovaGameState) game.getGameState();
+
+    assertEquals(gs.getGameScore(0), -14);
+    assertEquals(gs.getGameScore(1), -13);
+    assertEquals(gs.getGameScore(2), -12);
 
     // Random value check
-    gameState.getConservationPoints(0).setValue(9);
-    gameState.getAppeal(0).setValue(62);
+    gs.getConservationPoints(0).setValue(9);
+    gs.getAppeal(0).setValue(62);
 
-    assertEquals(gameState.getGameScore(0), 66);
+    assertEquals(gs.getGameScore(0), 66);
 
     // Edge case check
-    gameState.getConservationPoints(0).setValue(41);
-    gameState.getAppeal(0).setValue(113);
+    gs.getConservationPoints(0).setValue(41);
+    gs.getAppeal(0).setValue(113);
 
-    assertEquals(gameState.getGameScore(0), 212);
+    assertEquals(gs.getGameScore(0), 212);
   }
 }

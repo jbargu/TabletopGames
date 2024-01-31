@@ -67,8 +67,20 @@ public class ArkNovaGameState extends AbstractGameState {
     return getPlayerResources()[playerId].get(ArkNovaConstants.Resource.CONSERVATION_POINTS);
   }
 
+  public Counter getReputation(int playerId) {
+    return getPlayerResources()[playerId].get(ArkNovaConstants.Resource.REPUTATION);
+  }
+
   public Counter getMoney(int playerId) {
     return getPlayerResources()[playerId].get(ArkNovaConstants.Resource.MONEY);
+  }
+
+  public Counter getXTokens(int playerId) {
+    return getPlayerResources()[playerId].get(ArkNovaConstants.Resource.X_TOKEN);
+  }
+
+  public Counter getWorkers(int playerId) {
+    return getPlayerResources()[playerId].get(ArkNovaConstants.Resource.WORKER);
   }
 
   public Counter getIcon(int playerId, ArkNovaConstants.Icon icon) {
