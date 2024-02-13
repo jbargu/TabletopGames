@@ -5,6 +5,7 @@ import games.arknova.ArkNovaGameState;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.*;
@@ -20,6 +21,7 @@ public class PlayerOverviewPanel extends JPanel {
   int playerId;
 
   JLabel scoreLabel;
+  ArrayList<JLabel> actionLabels;
   Map<ArkNovaConstants.Icon, JLabel> iconLabels;
   Map<ArkNovaConstants.Resource, JLabel> resourceLabels;
 
@@ -31,6 +33,7 @@ public class PlayerOverviewPanel extends JPanel {
     scoreLabel = new JLabel();
     scoreLabel.setFont(ArkNovaGUIManager.defaultFont);
 
+    JPanel actionPanel = createActionPanel();
     JPanel resourcesPanel = createResourcesPanel();
     JPanel iconsPanel = createIconsPanel();
 
@@ -38,12 +41,30 @@ public class PlayerOverviewPanel extends JPanel {
 
     add(scoreLabel);
     add(resourcesPanel);
+    add(actionPanel);
     add(iconsPanel);
 
     addMouseListener();
 
     // Set to initial values
     update();
+  }
+
+  private JPanel createActionPanel() {
+    final JPanel actionPanel = new JPanel();
+    actionPanel.setLayout(new FlowLayout());
+
+    actionLabels = new ArrayList<>();
+    for (ArkNovaConstants.MainAction action : gs.getActionOrder()[playerId]) {
+      JLabel actionLabel =
+          new JLabel(
+              String.format(
+                  "%s: %s", action.name(), gs.getActionLevel()[playerId].get(action).name()));
+      actionLabel.setFont(ArkNovaGUIManager.defaultFont);
+      actionLabels.add(actionLabel);
+      actionPanel.add(actionLabel);
+    }
+    return actionPanel;
   }
 
   private JPanel createResourcesPanel() {
@@ -89,6 +110,17 @@ public class PlayerOverviewPanel extends JPanel {
 
   public void update() {
     scoreLabel.setText(String.format("Score: %d", (int) gs.getGameScore(playerId)));
+
+    for (int actionId = 0; actionId < gs.getActionOrder()[playerId].size(); actionId++) {
+      ArkNovaConstants.MainAction action = gs.getActionOrder()[playerId].get(actionId);
+      JLabel actionLabel = actionLabels.get(actionId);
+
+      SwingUtilities.invokeLater(
+          () ->
+              actionLabel.setText(
+                  String.format(
+                      "%s: %s", action.name(), gs.getActionLevel()[playerId].get(action).name())));
+    }
 
     for (Map.Entry<ArkNovaConstants.Resource, JLabel> entry : resourceLabels.entrySet()) {
       ArkNovaConstants.Resource resource = entry.getKey();

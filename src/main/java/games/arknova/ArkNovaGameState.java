@@ -27,6 +27,8 @@ public class ArkNovaGameState extends AbstractGameState {
 
   protected ArkNovaMap[] maps;
 
+  protected ArrayList<ArkNovaConstants.MainAction>[] actionOrder;
+  protected HashMap<ArkNovaConstants.MainAction, ArkNovaConstants.MainActionLevel>[] actionLevel;
   protected HashMap<ArkNovaConstants.Icon, Counter>[] playerIcons;
   protected HashMap<ArkNovaConstants.Resource, Counter>[] playerResources;
   protected Counter breakCounter;
@@ -37,6 +39,14 @@ public class ArkNovaGameState extends AbstractGameState {
    */
   public ArkNovaGameState(AbstractParameters gameParameters, int nPlayers) {
     super(gameParameters, nPlayers);
+  }
+
+  public ArrayList<ArkNovaConstants.MainAction>[] getActionOrder() {
+    return actionOrder;
+  }
+
+  public HashMap<ArkNovaConstants.MainAction, ArkNovaConstants.MainActionLevel>[] getActionLevel() {
+    return actionLevel;
   }
 
   /**

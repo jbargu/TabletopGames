@@ -7,9 +7,8 @@ import core.components.Counter;
 import games.arknova.actions.PlaceBuilding;
 import games.arknova.components.ArkNovaMap;
 import games.arknova.components.Building;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * The forward model contains all the game rules and logic. It is mainly responsible for declaring
@@ -48,10 +47,29 @@ public class ArkNovaForwardModel extends StandardForwardModel {
     gs.maps = new ArkNovaMap[nPlayers];
     gs.playerIcons = new HashMap[nPlayers];
     gs.playerResources = new HashMap[nPlayers];
+    gs.actionOrder = new ArrayList[nPlayers];
+    gs.actionLevel = new HashMap[nPlayers];
     for (int i = 0; i < nPlayers; i++) {
       gs.maps[i] = new ArkNovaMap(ArkNovaMap.MapData.Map7);
+      gs.actionOrder[i] = new ArrayList<>();
+      gs.actionLevel[i] = new HashMap<>();
+
       gs.playerIcons[i] = new HashMap<>();
       gs.playerResources[i] = new HashMap<>();
+
+      // Set actions
+      gs.actionOrder[i].add(ArkNovaConstants.MainAction.ANIMALS);
+      List<ArkNovaConstants.MainAction> shuffledActionsWithoutAnimals =
+          Arrays.stream(ArkNovaConstants.MainAction.values())
+              .filter(mainAction -> mainAction != ArkNovaConstants.MainAction.ANIMALS)
+              .collect(Collectors.toList());
+
+      Collections.shuffle(shuffledActionsWithoutAnimals);
+      gs.actionOrder[i].addAll(shuffledActionsWithoutAnimals);
+
+      for (ArkNovaConstants.MainAction action : ArkNovaConstants.MainAction.values()) {
+        gs.actionLevel[i].put(action, ArkNovaConstants.MainActionLevel.BASE);
+      }
 
       // Set all resource to the initial value
       gs.playerResources[i].put(

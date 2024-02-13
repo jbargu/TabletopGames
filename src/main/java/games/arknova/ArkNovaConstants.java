@@ -47,4 +47,17 @@ public class ArkNovaConstants {
       return String.format("data/arknova/icons/%s.png", this.name().toLowerCase());
     }
   }
+
+  public enum MainAction {
+    ANIMALS,
+    SPONSOR,
+    ASSOCIATION,
+    CARDS,
+    BUILD
+  }
+
+  public enum MainActionLevel {
+    BASE,
+    UPGRADED
+  }
 }
