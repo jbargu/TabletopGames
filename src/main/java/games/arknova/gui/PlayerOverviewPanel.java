@@ -15,6 +15,8 @@ import utilities.ImageIO;
 /** A panel with player's resources and icons. */
 public class PlayerOverviewPanel extends JPanel {
 
+  public static String ACTIONS_IMAGES_PATH = "data/arknova/actions";
+
   ArkNovaGameState gs;
   ArkNovaGUIManager gui;
 
@@ -52,15 +54,12 @@ public class PlayerOverviewPanel extends JPanel {
 
   private JPanel createActionPanel() {
     final JPanel actionPanel = new JPanel();
-    actionPanel.setLayout(new FlowLayout());
+    actionPanel.setLayout(new GridLayout(1, 5));
 
+    // Add empty labels, they will be populated in `update()` call
     actionLabels = new ArrayList<>();
     for (ArkNovaConstants.MainAction action : gs.getActionOrder()[playerId]) {
-      JLabel actionLabel =
-          new JLabel(
-              String.format(
-                  "%s: %s", action.name(), gs.getActionLevel()[playerId].get(action).name()));
-      actionLabel.setFont(ArkNovaGUIManager.defaultFont);
+      JLabel actionLabel = new JLabel("", JLabel.CENTER);
       actionLabels.add(actionLabel);
       actionPanel.add(actionLabel);
     }
@@ -111,15 +110,12 @@ public class PlayerOverviewPanel extends JPanel {
   public void update() {
     scoreLabel.setText(String.format("Score: %d", (int) gs.getGameScore(playerId)));
 
+    // Set action order
     for (int actionId = 0; actionId < gs.getActionOrder()[playerId].size(); actionId++) {
       ArkNovaConstants.MainAction action = gs.getActionOrder()[playerId].get(actionId);
       JLabel actionLabel = actionLabels.get(actionId);
 
-      SwingUtilities.invokeLater(
-          () ->
-              actionLabel.setText(
-                  String.format(
-                      "%s: %s", action.name(), gs.getActionLevel()[playerId].get(action).name())));
+      setActionImageLabel(action, actionLabel);
     }
 
     for (Map.Entry<ArkNovaConstants.Resource, JLabel> entry : resourceLabels.entrySet()) {
@@ -172,5 +168,25 @@ public class PlayerOverviewPanel extends JPanel {
           @Override
           public void mouseExited(MouseEvent e) {}
         });
+  }
+
+  /**
+   * Set the correct Action image to the labels.
+   *
+   * @param action Action to be used for the image.
+   * @param label JLabel where the image should be drawn.
+   */
+  private void setActionImageLabel(ArkNovaConstants.MainAction action, JLabel label) {
+    String imagePath =
+        String.format(
+            "%s/%s_%s_small.png",
+            ACTIONS_IMAGES_PATH,
+            action.name().toLowerCase(),
+            gs.getActionLevel()[playerId].get(action).name().toLowerCase());
+
+    Image iconImage =
+        ImageIO.GetInstance().getImage(imagePath).getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+
+    label.setIcon(new ImageIcon(iconImage));
   }
 }
