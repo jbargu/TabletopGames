@@ -3,12 +3,14 @@ package games.arknova.actions;
 import games.arknova.ArkNovaConstants;
 import games.arknova.ArkNovaGameState;
 import games.arknova.components.Building;
+import java.util.Objects;
 
 public class PlaceBuilding extends ArkNovaAction {
 
   Building building;
 
-  public PlaceBuilding(Building building) {
+  public PlaceBuilding(int playerId, Building building, boolean isFree) {
+    super(playerId, 0, isFree);
     this.building = building;
   }
 
@@ -16,13 +18,31 @@ public class PlaceBuilding extends ArkNovaAction {
   public boolean _execute(ArkNovaGameState gs) {
     gs.getCurrentPlayerMap().addBuilding(building);
 
-    //    System.out.println(String.format("Add building: " + building));
-    System.out.format("[%s] Add Building: %s\n", gs.getCurrentPlayer(), building);
-    gs.getAppeal(gs.getCurrentPlayer()).increment(gs.getCurrentPlayer());
-    gs.getIcon(gs.getCurrentPlayer(), ArkNovaConstants.Icon.ASIA)
-        .increment(2 * gs.getCurrentPlayer() + 1);
+    if (!isFree) {
+      gs.incMoney(
+          playerId, -ArkNovaConstants.MONEY_PER_ONE_BUILDING_HEX * building.getLayout().size());
+    }
 
-    return super._execute(gs);
+    return true;
+  }
+
+  @Override
+  public ArkNovaAction copy() {
+    return new PlaceBuilding(playerId, building, isFree);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    if (!super.equals(o)) return false;
+    PlaceBuilding that = (PlaceBuilding) o;
+    return Objects.equals(building, that.building);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), building);
   }
 
   @Override

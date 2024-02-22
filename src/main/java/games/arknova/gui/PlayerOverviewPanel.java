@@ -58,7 +58,7 @@ public class PlayerOverviewPanel extends JPanel {
 
     // Add empty labels, they will be populated in `update()` call
     actionLabels = new ArrayList<>();
-    for (ArkNovaConstants.MainAction action : gs.getActionOrder()[playerId]) {
+    for (ArkNovaConstants.MainAction action : gs.getMainActionOrder()[playerId]) {
       JLabel actionLabel = new JLabel("", JLabel.CENTER);
       actionLabels.add(actionLabel);
       actionPanel.add(actionLabel);
@@ -111,8 +111,8 @@ public class PlayerOverviewPanel extends JPanel {
     scoreLabel.setText(String.format("Score: %d", (int) gs.getGameScore(playerId)));
 
     // Set action order
-    for (int actionId = 0; actionId < gs.getActionOrder()[playerId].size(); actionId++) {
-      ArkNovaConstants.MainAction action = gs.getActionOrder()[playerId].get(actionId);
+    for (int actionId = 0; actionId < gs.getMainActionOrder()[playerId].size(); actionId++) {
+      ArkNovaConstants.MainAction action = gs.getMainActionOrder()[playerId].get(actionId);
       JLabel actionLabel = actionLabels.get(actionId);
 
       setActionImageLabel(action, actionLabel);
@@ -182,7 +182,7 @@ public class PlayerOverviewPanel extends JPanel {
             "%s/%s_%s_small.png",
             ACTIONS_IMAGES_PATH,
             action.name().toLowerCase(),
-            gs.getActionLevel()[playerId].get(action).name().toLowerCase());
+            gs.getMainActionLevel()[playerId].get(action).name().toLowerCase());
 
     Image iconImage =
         ImageIO.GetInstance().getImage(imagePath).getScaledInstance(50, 50, Image.SCALE_SMOOTH);

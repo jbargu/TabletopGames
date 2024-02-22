@@ -27,8 +27,9 @@ public class ArkNovaGameState extends AbstractGameState {
 
   protected ArkNovaMap[] maps;
 
-  protected ArrayList<ArkNovaConstants.MainAction>[] actionOrder;
-  protected HashMap<ArkNovaConstants.MainAction, ArkNovaConstants.MainActionLevel>[] actionLevel;
+  protected ArrayList<ArkNovaConstants.MainAction>[] mainActionOrder;
+  protected HashMap<ArkNovaConstants.MainAction, ArkNovaConstants.MainActionLevel>[]
+      mainActionLevel;
   protected HashMap<ArkNovaConstants.Icon, Counter>[] playerIcons;
   protected HashMap<ArkNovaConstants.Resource, Counter>[] playerResources;
   protected Counter breakCounter;
@@ -41,12 +42,13 @@ public class ArkNovaGameState extends AbstractGameState {
     super(gameParameters, nPlayers);
   }
 
-  public ArrayList<ArkNovaConstants.MainAction>[] getActionOrder() {
-    return actionOrder;
+  public ArrayList<ArkNovaConstants.MainAction>[] getMainActionOrder() {
+    return mainActionOrder;
   }
 
-  public HashMap<ArkNovaConstants.MainAction, ArkNovaConstants.MainActionLevel>[] getActionLevel() {
-    return actionLevel;
+  public HashMap<ArkNovaConstants.MainAction, ArkNovaConstants.MainActionLevel>[]
+      getMainActionLevel() {
+    return mainActionLevel;
   }
 
   /**
@@ -97,6 +99,35 @@ public class ArkNovaGameState extends AbstractGameState {
     return getPlayerIcons()[playerId].get(icon);
   }
 
+  /** Get max building size that can be built given the current money. */
+  public int getMaxBuildableBuildingSize(int playerId) {
+    return getMoney(playerId).getValue() / ArkNovaConstants.MONEY_PER_ONE_BUILDING_HEX;
+  }
+
+  // Counter
+  public void incMoney(int playerId, int amount) {
+    Counter money = getMoney(playerId);
+    if (amount < 0 && money.getValue() < amount) {
+      throw new RuntimeException("Not enough money to deduce!");
+    }
+    getMoney(playerId).increment(amount);
+  }
+
+  public void setMainActionIndexTo(
+      int playerId, ArkNovaConstants.MainAction mainAction, int index) {
+    mainActionOrder[playerId].remove(mainAction);
+    mainActionOrder[playerId].add(index, mainAction);
+  }
+
+  // TODO: fix when adding cards
+  public boolean hasPlayedEngineer(int playerId) {
+    return false;
+  }
+
+  public boolean hasPlayedDiversityResearcher(int playerId) {
+    return false;
+  }
+
   /**
    * Returns all Components used in the game and referred to by componentId from actions or rules.
    * This method is called after initialising the game state, so all components will be initialised
@@ -130,9 +161,35 @@ public class ArkNovaGameState extends AbstractGameState {
   protected ArkNovaGameState _copy(int playerId) {
     ArkNovaGameState copy = new ArkNovaGameState(gameParameters, getNPlayers());
     copy.maps = new ArkNovaMap[getNPlayers()];
+    copy.playerIcons = new HashMap[nPlayers];
+    copy.playerResources = new HashMap[nPlayers];
+    copy.mainActionOrder = new ArrayList[nPlayers];
+    copy.mainActionLevel = new HashMap[nPlayers];
 
     for (int i = 0; i < getNPlayers(); i++) {
       copy.maps[i] = this.maps[i].copy();
+
+      copy.mainActionOrder[i] = new ArrayList<>();
+      copy.mainActionLevel[i] = new HashMap<>();
+
+      copy.playerIcons[i] = new HashMap<>();
+      copy.playerResources[i] = new HashMap<>();
+
+      for (ArkNovaConstants.MainAction mainAction : getMainActionOrder()[i]) {
+        copy.mainActionOrder[i].add(mainAction);
+      }
+
+      for (ArkNovaConstants.MainAction mainAction : getMainActionLevel()[i].keySet()) {
+        copy.mainActionLevel[i].put(mainAction, getMainActionLevel()[i].get(mainAction));
+      }
+
+      for (ArkNovaConstants.Icon playerIcon : getPlayerIcons()[i].keySet()) {
+        copy.playerIcons[i].put(playerIcon, getPlayerIcons()[i].get(playerIcon));
+      }
+
+      for (ArkNovaConstants.Resource playerResource : getPlayerResources()[i].keySet()) {
+        copy.playerResources[i].put(playerResource, getPlayerResources()[i].get(playerResource));
+      }
     }
     // TODO: deep copy all variables to the new game state.
     return copy;

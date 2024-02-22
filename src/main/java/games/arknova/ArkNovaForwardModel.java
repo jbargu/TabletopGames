@@ -4,9 +4,9 @@ import core.AbstractGameState;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Counter;
-import games.arknova.actions.PlaceBuilding;
+import games.arknova.actions.ArkNovaBuildAction;
+import games.arknova.actions.ArkNovaExtendedSequenceAction;
 import games.arknova.components.ArkNovaMap;
-import games.arknova.components.Building;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -47,28 +47,28 @@ public class ArkNovaForwardModel extends StandardForwardModel {
     gs.maps = new ArkNovaMap[nPlayers];
     gs.playerIcons = new HashMap[nPlayers];
     gs.playerResources = new HashMap[nPlayers];
-    gs.actionOrder = new ArrayList[nPlayers];
-    gs.actionLevel = new HashMap[nPlayers];
+    gs.mainActionOrder = new ArrayList[nPlayers];
+    gs.mainActionLevel = new HashMap[nPlayers];
     for (int i = 0; i < nPlayers; i++) {
       gs.maps[i] = new ArkNovaMap(ArkNovaMap.MapData.Map7);
-      gs.actionOrder[i] = new ArrayList<>();
-      gs.actionLevel[i] = new HashMap<>();
+      gs.mainActionOrder[i] = new ArrayList<>();
+      gs.mainActionLevel[i] = new HashMap<>();
 
       gs.playerIcons[i] = new HashMap<>();
       gs.playerResources[i] = new HashMap<>();
 
       // Set actions
-      gs.actionOrder[i].add(ArkNovaConstants.MainAction.ANIMALS);
+      gs.mainActionOrder[i].add(ArkNovaConstants.MainAction.ANIMALS);
       List<ArkNovaConstants.MainAction> shuffledActionsWithoutAnimals =
           Arrays.stream(ArkNovaConstants.MainAction.values())
               .filter(mainAction -> mainAction != ArkNovaConstants.MainAction.ANIMALS)
               .collect(Collectors.toList());
 
       Collections.shuffle(shuffledActionsWithoutAnimals);
-      gs.actionOrder[i].addAll(shuffledActionsWithoutAnimals);
+      gs.mainActionOrder[i].addAll(shuffledActionsWithoutAnimals);
 
       for (ArkNovaConstants.MainAction action : ArkNovaConstants.MainAction.values()) {
-        gs.actionLevel[i].put(action, ArkNovaConstants.MainActionLevel.BASE);
+        gs.mainActionLevel[i].put(action, ArkNovaConstants.MainActionLevel.BASE);
       }
 
       // Set all resource to the initial value
@@ -109,34 +109,46 @@ public class ArkNovaForwardModel extends StandardForwardModel {
    * @return - List of AbstractAction objects.
    */
   @Override
-  protected List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
+  protected List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
+    ArkNovaGameState gs = (ArkNovaGameState) state;
+
     List<AbstractAction> actions = new ArrayList<>();
-    // TODO: create action classes for the current player in the given game state and add them to
-    // the list. Below just an example that does nothing, remove.
-    ArkNovaGameState state = (ArkNovaGameState) gs;
 
-    int i = state.getCurrentPlayer();
+    int playerId = gs.getCurrentPlayer();
 
-    boolean hasDiversityResearcher = false;
-    boolean isBuildUpgraded = true;
-    ArrayList<Building> legalBuildingsPlacements =
-        state
-            .getCurrentPlayerMap()
-            .getLegalBuildingsPlacements(isBuildUpgraded, hasDiversityResearcher);
+    for (int actionStrength = 0;
+        actionStrength < gs.getMainActionOrder()[playerId].size();
+        actionStrength++) {
+      ArkNovaConstants.MainAction mainAction =
+          gs.getMainActionOrder()[playerId].get(actionStrength);
 
-    System.out.format(
-        "[%s] Legal buildings placements: %s \n",
-        state.getCurrentPlayer(), legalBuildingsPlacements.size());
-    for (Building building : legalBuildingsPlacements) {
-      actions.add(new PlaceBuilding(building));
+      if (mainAction == ArkNovaConstants.MainAction.BUILD) {
+        boolean isBuildUpgraded =
+            gs.getMainActionLevel()[playerId].get(ArkNovaConstants.MainAction.BUILD)
+                == ArkNovaConstants.MainActionLevel.UPGRADED;
+        ArkNovaExtendedSequenceAction buildAction =
+            new ArkNovaBuildAction(playerId, actionStrength + 1, false, isBuildUpgraded);
+
+        actions.add(buildAction);
+      }
     }
+
     return actions;
   }
 
   @Override
   protected void _afterAction(AbstractGameState currentState, AbstractAction actionTaken) {
+    ArkNovaGameState gs = (ArkNovaGameState) currentState;
+
+    // Reset action index
+    if (currentState.isActionInProgress()) {
+      if (actionTaken instanceof ArkNovaBuildAction) {
+        gs.setMainActionIndexTo(gs.getCurrentPlayer(), ArkNovaConstants.MainAction.BUILD, 0);
+      }
+
+      return;
+    }
 
     endPlayerTurn(currentState);
-    super._afterAction(currentState, actionTaken);
   }
 }

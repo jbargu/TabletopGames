@@ -148,7 +148,10 @@ public class ArkNovaMap extends Component {
    * @return all possible building placements with all possible rotations
    */
   public ArrayList<Building> getLegalBuildingsPlacements(
-      boolean isBuildUpgraded, boolean hasDiversityResearcher) {
+      boolean isBuildUpgraded,
+      boolean hasDiversityResearcher,
+      int maxBuildingSize,
+      HashSet<BuildingType> alreadyBuiltBuildings) {
     ArrayList<Building> placements = new ArrayList<>();
 
     HashSet<HexTile> coveredHexes = getCoveredHexes();
@@ -171,7 +174,9 @@ public class ArkNovaMap extends Component {
         Arrays.stream(BuildingType.values())
             .filter(
                 buildingType ->
-                    buildingType.subType != BuildingType.BuildingSubType.SPONSOR_BUILDING
+                    buildingType.getLayout().length <= maxBuildingSize
+                        && !alreadyBuiltBuildings.contains(buildingType)
+                        && buildingType.subType != BuildingType.BuildingSubType.SPONSOR_BUILDING
                         && !(buildingType.subType == BuildingType.BuildingSubType.ENCLOSURE_SPECIAL
                             && existingSpecialBuildings.contains(buildingType)))
             .collect(Collectors.toCollection(HashSet::new));
@@ -183,7 +188,7 @@ public class ArkNovaMap extends Component {
             .collect(Collectors.toSet());
 
     // We cannot build aviary and reptile house if build is not upgraded
-    if (!isBuildUpgraded) {
+    if (!isBuildUpgraded && maxBuildingSize >= BuildingType.LARGE_BIRD_AVIARY.getLayout().length) {
       buildingTypes.remove(BuildingType.LARGE_BIRD_AVIARY);
       buildingTypes.remove(BuildingType.REPTILE_HOUSE);
     }

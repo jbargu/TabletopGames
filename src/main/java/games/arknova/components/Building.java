@@ -1,6 +1,7 @@
 package games.arknova.components;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class Building {
   protected BuildingType type;
@@ -111,6 +112,23 @@ public class Building {
         + ", emptySpaces="
         + emptySpaces
         + '}';
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Building building = (Building) o;
+    return emptySpaces == building.emptySpaces
+        && type == building.type
+        && Objects.equals(originHex, building.originHex)
+        && rotation == building.rotation
+        && Objects.equals(layout, building.layout);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(type, originHex, rotation, layout, emptySpaces);
   }
 
   public enum Rotation {
