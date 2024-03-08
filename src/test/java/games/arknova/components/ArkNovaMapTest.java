@@ -2,10 +2,7 @@ package games.arknova.components;
 
 import static org.testng.Assert.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.testng.annotations.Test;
 
@@ -97,7 +94,8 @@ public class ArkNovaMapTest {
     map.addBuilding(
         new Building(BuildingType.PETTING_ZOO, new HexTile(6, 1), Building.Rotation.ROT_180));
 
-    ArrayList<Building> legalBuildingsPlacements = map.getLegalBuildingsPlacements(false, false);
+    ArrayList<Building> legalBuildingsPlacements =
+        map.getLegalBuildingsPlacements(false, false, 100, new HashSet<>());
 
     assert (legalBuildingsPlacements.stream()
         .filter(building -> building.getType() == BuildingType.PETTING_ZOO)
@@ -111,10 +109,27 @@ public class ArkNovaMapTest {
     map.addBuilding(
         new Building(BuildingType.LARGE_BIRD_AVIARY, new HexTile(6, 1), Building.Rotation.ROT_180));
 
-    ArrayList<Building> legalBuildingsPlacements = map.getLegalBuildingsPlacements(true, true);
+    ArrayList<Building> legalBuildingsPlacements =
+        map.getLegalBuildingsPlacements(true, true, 100, new HashSet<>());
 
     assert (legalBuildingsPlacements.stream()
         .filter(building -> building.getType() == BuildingType.LARGE_BIRD_AVIARY)
+        .collect(Collectors.toSet())
+        .isEmpty());
+  }
+
+  @Test
+  public void testGetLegalBuildingsPlacementsSize1AlreadyPlaced() {
+    ArkNovaMap map = new ArkNovaMap(ArkNovaMap.MapData.Map7);
+
+    HashSet<BuildingType> alreadyPlacedBuildings =
+        new HashSet<>(Arrays.asList(BuildingType.SIZE_1));
+
+    ArrayList<Building> legalBuildingsPlacements =
+        map.getLegalBuildingsPlacements(false, false, 100, alreadyPlacedBuildings);
+
+    assert (legalBuildingsPlacements.stream()
+        .filter(building -> building.getType() == BuildingType.SIZE_1)
         .collect(Collectors.toSet())
         .isEmpty());
   }
@@ -125,7 +140,7 @@ public class ArkNovaMapTest {
     map.addBuilding(new Building(BuildingType.KIOSK, new HexTile(7, 2), Building.Rotation.ROT_0));
 
     // We can't add a kiosk to a single kiosk on board
-    assert (map.getLegalBuildingsPlacements(true, true).stream()
+    assert (map.getLegalBuildingsPlacements(true, true, 100, new HashSet<>()).stream()
         .filter(building -> building.getType() == BuildingType.KIOSK)
         .collect(Collectors.toSet())
         .isEmpty());
@@ -133,7 +148,7 @@ public class ArkNovaMapTest {
     // We add another pavilion to the kiosk -> but we are still too close for kiosk
     map.addBuilding(
         new Building(BuildingType.PAVILION, new HexTile(6, 2), Building.Rotation.ROT_0));
-    assert (map.getLegalBuildingsPlacements(true, true).stream()
+    assert (map.getLegalBuildingsPlacements(true, true, 100, new HashSet<>()).stream()
         .filter(building -> building.getType() == BuildingType.KIOSK)
         .collect(Collectors.toSet())
         .isEmpty());
@@ -143,7 +158,7 @@ public class ArkNovaMapTest {
         new Building(BuildingType.PAVILION, new HexTile(5, 2), Building.Rotation.ROT_0));
 
     List<HexTile> kioskLocations =
-        map.getLegalBuildingsPlacements(true, false).stream()
+        map.getLegalBuildingsPlacements(true, false, 100, new HashSet<>()).stream()
             .filter(building -> building.getType() == BuildingType.KIOSK)
             .map(Building::getOriginHex)
             .collect(Collectors.toList());
@@ -153,7 +168,7 @@ public class ArkNovaMapTest {
 
     // If we have a Diversity researcher, we have 3 possible choices
     kioskLocations =
-        map.getLegalBuildingsPlacements(true, true).stream()
+        map.getLegalBuildingsPlacements(true, true, 100, new HashSet<>()).stream()
             .filter(building -> building.getType() == BuildingType.KIOSK)
             .map(Building::getOriginHex)
             .collect(Collectors.toList());

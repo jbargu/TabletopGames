@@ -16,7 +16,7 @@ public class PlaceBuilding extends ArkNovaAction {
 
   @Override
   public boolean _execute(ArkNovaGameState gs) {
-    gs.getCurrentPlayerMap().addBuilding(building);
+    gs.getMaps()[playerId].addBuilding(building);
 
     if (!isFree) {
       gs.incMoney(
