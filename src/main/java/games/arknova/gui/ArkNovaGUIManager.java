@@ -6,11 +6,13 @@ import core.Game;
 import games.arknova.ArkNovaGameState;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
+import gui.IScreenHighlight;
 import java.awt.*;
 import java.util.HashSet;
 import java.util.Set;
 import javax.swing.*;
 import players.human.ActionController;
+import players.human.HumanGUIPlayer;
 import utilities.ImageIO;
 
 /**
@@ -39,6 +41,8 @@ public class ArkNovaGUIManager extends AbstractGUIManager {
   SidebarPanel sidebar;
 
   JLabel playerNumber;
+  // Action buttons for human player
+  JComponent actionPanel;
 
   public ArkNovaGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> human) {
     super(parent, game, ac, human);
@@ -64,6 +68,18 @@ public class ArkNovaGUIManager extends AbstractGUIManager {
     createActionHistoryPanel(defaultDisplayWidth, defaultInfoPanelHeight * 4, new HashSet<>());
     sidebar = new SidebarPanel(this, gs, historyContainer);
     parent.add(sidebar, BorderLayout.LINE_END);
+
+    actionPanel =
+        createActionPanel(
+            new IScreenHighlight[] {},
+            defaultDisplayWidth * 4,
+            defaultActionPanelHeight * 4,
+            true,
+            false,
+            null,
+            null,
+            null);
+    parent.add(actionPanel, BorderLayout.PAGE_END);
 
     parent.revalidate();
     parent.setVisible(true);
@@ -154,8 +170,7 @@ public class ArkNovaGUIManager extends AbstractGUIManager {
    */
   @Override
   public int getMaxActionSpace() {
-    // TODO
-    return 10;
+    return 200;
   }
 
   public int getCurrentlyObservedPlayer() {
@@ -175,6 +190,12 @@ public class ArkNovaGUIManager extends AbstractGUIManager {
   @Override
   protected void _update(AbstractPlayer player, AbstractGameState gameState) {
     playerNumber.setText("Player  " + currentlyObservedPlayer);
+
+    if (player instanceof HumanGUIPlayer) {
+      actionPanel.setVisible(true);
+    } else {
+      actionPanel.setVisible(false);
+    }
 
     sidebar.update();
     parent.repaint();
