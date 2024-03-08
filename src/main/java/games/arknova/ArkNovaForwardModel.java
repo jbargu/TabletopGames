@@ -140,12 +140,7 @@ public class ArkNovaForwardModel extends StandardForwardModel {
   protected void _afterAction(AbstractGameState currentState, AbstractAction actionTaken) {
     ArkNovaGameState gs = (ArkNovaGameState) currentState;
 
-    // Reset action index
     if (currentState.isActionInProgress()) {
-      if (actionTaken instanceof ArkNovaBuildAction) {
-        gs.setMainActionIndexTo(gs.getCurrentPlayer(), ArkNovaConstants.MainAction.BUILD, 0);
-      }
-
       return;
     }
 

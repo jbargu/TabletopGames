@@ -3,6 +3,7 @@ package games.arknova.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
+import games.arknova.ArkNovaConstants;
 import games.arknova.ArkNovaGameState;
 import games.arknova.components.Building;
 import games.arknova.components.BuildingType;
@@ -57,9 +58,8 @@ public class ArkNovaBuildAction extends ArkNovaExtendedSequenceAction {
     // TODO: take into account Engineer and filter the buildings
     int maxBuildingSize = Math.min(strength, gs.getMaxBuildableBuildingSize(playerId));
     ArrayList<Building> legalBuildingsPlacements =
-        gs.getCurrentPlayerMap()
-            .getLegalBuildingsPlacements(
-                isBuildUpgraded, hasDiversityResearcher, maxBuildingSize, alreadyBuiltBuildings);
+        gs.getMaps()[playerId].getLegalBuildingsPlacements(
+            isBuildUpgraded, hasDiversityResearcher, maxBuildingSize, alreadyBuiltBuildings);
 
     //    System.out.format(
     //        "[%s] Legal buildings placements: %s \n",
@@ -68,7 +68,7 @@ public class ArkNovaBuildAction extends ArkNovaExtendedSequenceAction {
       actions.add(new PlaceBuilding(playerId, building, isFree));
     }
 
-    if (!actions.isEmpty()) {
+    if (!actions.isEmpty() && !alreadyBuiltBuildings.isEmpty()) {
       actions.add(new PassAction(playerId));
     }
 
@@ -97,6 +97,8 @@ public class ArkNovaBuildAction extends ArkNovaExtendedSequenceAction {
     if (strength == 0
         || action instanceof PassAction
         || !isBuildUpgraded && (!hasPlayedEngineer || hasUsedEngineerThisRound)) {
+
+      gs.setMainActionIndexTo(gs.getCurrentPlayer(), ArkNovaConstants.MainAction.BUILD, 0);
       executed = true;
     }
   }
@@ -114,8 +116,11 @@ public class ArkNovaBuildAction extends ArkNovaExtendedSequenceAction {
 
   @Override
   public ArkNovaBuildAction copy() {
-    // TODO: copy non-final variables appropriately
-    return this;
+    ArkNovaBuildAction copy = new ArkNovaBuildAction(playerId, strength, isFree, isBuildUpgraded);
+
+    copy.alreadyBuiltBuildings.addAll(this.alreadyBuiltBuildings);
+
+    return copy;
   }
 
   @Override
@@ -124,18 +129,25 @@ public class ArkNovaBuildAction extends ArkNovaExtendedSequenceAction {
     if (o == null || getClass() != o.getClass()) return false;
     if (!super.equals(o)) return false;
     ArkNovaBuildAction that = (ArkNovaBuildAction) o;
-    return executed == that.executed;
+    return executed == that.executed
+        && isBuildUpgraded == that.isBuildUpgraded
+        && hasUsedEngineerThisRound == that.hasUsedEngineerThisRound
+        && Objects.equals(alreadyBuiltBuildings, that.alreadyBuiltBuildings);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), executed);
+    return Objects.hash(
+        super.hashCode(),
+        executed,
+        isBuildUpgraded,
+        hasUsedEngineerThisRound,
+        alreadyBuiltBuildings);
   }
 
   @Override
   public String toString() {
-    // TODO: Replace with appropriate string, including any action parameters
-    return getClass().getSimpleName();
+    return String.format("ArkNovaBuildAction(%s)", strength);
   }
 
   /**
