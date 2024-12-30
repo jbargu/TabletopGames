@@ -113,6 +113,10 @@ public class ArkNovaGameState extends AbstractGameState {
     getMoney(playerId).increment(amount);
   }
 
+  public void incReputation(int playerId, int amount) {
+    getReputation(playerId).increment(amount);
+  }
+
   public void setMainActionIndexTo(
       int playerId, ArkNovaConstants.MainAction mainAction, int index) {
     mainActionOrder[playerId].remove(mainAction);

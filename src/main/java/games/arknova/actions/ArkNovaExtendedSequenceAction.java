@@ -5,7 +5,6 @@ import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * The extended actions framework supports 2 use-cases:
@@ -104,6 +103,7 @@ public class ArkNovaExtendedSequenceAction extends ArkNovaAction implements IExt
   public boolean execute(AbstractGameState gs) {
     // TODO: Some functionality applied which changes the given game state.
     gs.setActionInProgress(this);
+    super.execute(gs);
     return true;
   }
 

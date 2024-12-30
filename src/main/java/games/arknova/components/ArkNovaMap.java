@@ -4,11 +4,11 @@ import core.CoreConstants;
 import core.components.Component;
 import games.arknova.ArkNovaConstants;
 import games.arknova.actions.Bonus;
+import games.arknova.actions.GainBonus;
 import java.awt.*;
 import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import utilities.Vector2D;
 
 /**
@@ -284,48 +284,74 @@ public class ArkNovaMap extends Component {
     Map7(
         "Ice Cream parlors",
         "data/arknova/Map7.png",
-        Stream.of(
-                new SimpleEntry<>(new HexTile(0, 0), Terrain.ROCK),
-                new SimpleEntry<>(new HexTile(0, 1), Terrain.ROCK),
-                new SimpleEntry<>(new HexTile(1, 3), Terrain.ROCK),
-                new SimpleEntry<>(new HexTile(2, 3), Terrain.ROCK),
-                new SimpleEntry<>(new HexTile(3, 0), Terrain.ROCK),
-                new SimpleEntry<>(new HexTile(4, -1), Terrain.ROCK),
-                new SimpleEntry<>(new HexTile(4, -2), Terrain.ROCK),
-                new SimpleEntry<>(new HexTile(4, 2), Terrain.ROCK),
-                new SimpleEntry<>(new HexTile(5, 1), Terrain.ROCK),
-                new SimpleEntry<>(new HexTile(7, -4), Terrain.WATER),
-                new SimpleEntry<>(new HexTile(8, -4), Terrain.WATER),
-                new SimpleEntry<>(new HexTile(8, -3), Terrain.WATER),
-                new SimpleEntry<>(new HexTile(8, -2), Terrain.WATER),
-                new SimpleEntry<>(new HexTile(7, -2), Terrain.WATER),
-                new SimpleEntry<>(new HexTile(7, 1), Terrain.WATER),
-                new SimpleEntry<>(new HexTile(8, 1), Terrain.WATER),
-                new SimpleEntry<>(new HexTile(3, 2), Terrain.BUILD_2_REQUIRED),
-                new SimpleEntry<>(new HexTile(3, 3), Terrain.BUILD_2_REQUIRED),
-                new SimpleEntry<>(new HexTile(3, 4), Terrain.BUILD_2_REQUIRED),
-                new SimpleEntry<>(new HexTile(1, 0), Terrain.BONUS_REP_PLUS_ONE))
-            .collect(
-                Collectors.toMap(
-                    SimpleEntry::getKey,
-                    SimpleEntry::getValue,
-                    (prev, next) -> next,
-                    HashMap::new)));
+        new Object() {
+          HashMap<HexTile, Terrain> evaluate() {
+            HashMap<HexTile, Terrain> map = new HashMap<>();
+            for (SimpleEntry<HexTile, Terrain> hexTileTerrainSimpleEntry :
+                Arrays.asList(
+                    new SimpleEntry<>(new HexTile(0, 0), Terrain.ROCK),
+                    new SimpleEntry<>(new HexTile(0, 1), Terrain.ROCK),
+                    new SimpleEntry<>(new HexTile(1, 3), Terrain.ROCK),
+                    new SimpleEntry<>(new HexTile(2, 3), Terrain.ROCK),
+                    new SimpleEntry<>(new HexTile(3, 0), Terrain.ROCK),
+                    new SimpleEntry<>(new HexTile(4, -1), Terrain.ROCK),
+                    new SimpleEntry<>(new HexTile(4, -2), Terrain.ROCK),
+                    new SimpleEntry<>(new HexTile(4, 2), Terrain.ROCK),
+                    new SimpleEntry<>(new HexTile(5, 1), Terrain.ROCK),
+                    new SimpleEntry<>(new HexTile(7, -4), Terrain.WATER),
+                    new SimpleEntry<>(new HexTile(8, -4), Terrain.WATER),
+                    new SimpleEntry<>(new HexTile(8, -3), Terrain.WATER),
+                    new SimpleEntry<>(new HexTile(8, -2), Terrain.WATER),
+                    new SimpleEntry<>(new HexTile(7, -2), Terrain.WATER),
+                    new SimpleEntry<>(new HexTile(7, 1), Terrain.WATER),
+                    new SimpleEntry<>(new HexTile(8, 1), Terrain.WATER),
+                    new SimpleEntry<>(new HexTile(3, 2), Terrain.BUILD_2_REQUIRED),
+                    new SimpleEntry<>(new HexTile(3, 3), Terrain.BUILD_2_REQUIRED),
+                    new SimpleEntry<>(new HexTile(3, 4), Terrain.BUILD_2_REQUIRED))) {
+              map.put(hexTileTerrainSimpleEntry.getKey(), hexTileTerrainSimpleEntry.getValue());
+            }
+            return map;
+          }
+        }.evaluate(),
+        new Object() {
+          HashMap<HexTile, Bonus> evaluate() {
+            HashMap<HexTile, Bonus> map = new HashMap<>();
+            for (SimpleEntry<HexTile, GainBonus> bonusHexTile :
+                Arrays.asList(
+                    new SimpleEntry<>(
+                        new HexTile(0, 2),
+                        new GainBonus(ArkNovaConstants.Resource.REPUTATION, true, 1)))) {
+
+              map.put(bonusHexTile.getKey(), bonusHexTile.getValue());
+            }
+            return map;
+          }
+        }.evaluate());
 
     String fullName;
 
     String mapImagePath;
 
     HashMap<HexTile, Terrain> terrain;
+    HashMap<HexTile, Bonus> placementBonuses;
 
-    MapData(String fullName, String mapImagePath, HashMap<HexTile, Terrain> terrain) {
+    MapData(
+        String fullName,
+        String mapImagePath,
+        HashMap<HexTile, Terrain> terrain,
+        HashMap<HexTile, Bonus> placementBonuses) {
       this.fullName = fullName;
       this.mapImagePath = mapImagePath;
       this.terrain = terrain;
+      this.placementBonuses = placementBonuses;
     }
 
     public HashMap<HexTile, Terrain> getTerrain() {
       return terrain;
+    }
+
+    public HashMap<HexTile, Bonus> getPlacementBonuses() {
+      return placementBonuses;
     }
 
     public String getMapImagePath() {

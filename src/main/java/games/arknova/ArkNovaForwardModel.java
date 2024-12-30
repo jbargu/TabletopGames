@@ -4,8 +4,8 @@ import core.AbstractGameState;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Counter;
+import games.arknova.actions.ArkNovaAction;
 import games.arknova.actions.ArkNovaBuildAction;
-import games.arknova.actions.ArkNovaExtendedSequenceAction;
 import games.arknova.components.ArkNovaMap;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -68,7 +68,7 @@ public class ArkNovaForwardModel extends StandardForwardModel {
       gs.mainActionOrder[i].addAll(shuffledActionsWithoutAnimals);
 
       for (ArkNovaConstants.MainAction action : ArkNovaConstants.MainAction.values()) {
-        gs.mainActionLevel[i].put(action, ArkNovaConstants.MainActionLevel.BASE);
+        gs.mainActionLevel[i].put(action, ArkNovaConstants.MainActionLevel.UPGRADED);
       }
 
       // Set all resource to the initial value
@@ -126,7 +126,7 @@ public class ArkNovaForwardModel extends StandardForwardModel {
         boolean isBuildUpgraded =
             gs.getMainActionLevel()[playerId].get(ArkNovaConstants.MainAction.BUILD)
                 == ArkNovaConstants.MainActionLevel.UPGRADED;
-        ArkNovaExtendedSequenceAction buildAction =
+        ArkNovaAction buildAction =
             new ArkNovaBuildAction(playerId, actionStrength + 1, false, isBuildUpgraded);
 
         actions.add(buildAction);

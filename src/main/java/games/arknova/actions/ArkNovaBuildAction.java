@@ -30,7 +30,7 @@ import java.util.Objects;
  * <p>They should also extend the {@link AbstractAction} class, or any other core actions. As such,
  * all guidelines in {@link ArkNovaAction} apply here as well.
  */
-public class ArkNovaBuildAction extends ArkNovaExtendedSequenceAction {
+public class ArkNovaBuildAction extends ArkNovaAction implements IExtendedSequence {
 
   boolean executed = false;
 
@@ -73,6 +73,11 @@ public class ArkNovaBuildAction extends ArkNovaExtendedSequenceAction {
     }
 
     return actions;
+  }
+
+  @Override
+  public int getCurrentPlayer(AbstractGameState state) {
+    return playerId;
   }
 
   @Override
@@ -147,7 +152,7 @@ public class ArkNovaBuildAction extends ArkNovaExtendedSequenceAction {
 
   @Override
   public String toString() {
-    return String.format("ArkNovaBuildAction(%s)", strength);
+    return String.format("[%s] ArkNovaBuildAction(%s)", isBuildUpgraded ? "UPG" : "BASE", strength);
   }
 
   /**
